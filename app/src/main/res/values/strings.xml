@@ -9,4 +9,19 @@
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string-array name="radio_urls">
+        <item>http://s3.radio.co/s5e286e909/listen</item>
+        <item>http://stream.live.vc.bbcmedia.co.uk/bbc_radio_one</item>
+        <item>http://stream.live.vc.bbcmedia.co.uk/bbc_radio_three</item>
+        <item>http://stream.live.vc.bbcmedia.co.uk/bbc_radio_five_live_online_nonuk</item>
+        <item>http://173.244.215.162:8200/;</item>
+    </string-array>
+    <string-array name="radio_stations">
+        <item>WUML 91.5 FM Lowell, MA</item>
+        <item>BBC Radio 1 </item>
+        <item>BBC Radio 3 HD</item>
+        <item>BBC Radio 5 live </item>
+        <item>GotRadio - Rock Room (Alternative)</item>
+    </string-array>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

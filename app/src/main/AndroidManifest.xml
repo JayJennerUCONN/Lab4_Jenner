@@ -8,14 +8,14 @@
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="Radio Music Player"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
         android:theme="@style/Theme.A2021_03_17_radio">
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name"
+            android:label="Radio Music Player"
             android:theme="@style/Theme.A2021_03_17_radio.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

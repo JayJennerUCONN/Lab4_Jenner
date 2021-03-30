@@ -7,7 +7,10 @@ import android.media.AudioTrack;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.SeekBar;
+import android.widget.Spinner;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -23,17 +26,28 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
     private final String TAG = "MAIN__";
     private MediaPlayer mediaPlayer;
-    private static final String url = "http://stream.whus.org:8000/whusfm"; //";//http://vprbbc.streamguys.net:80/vprbbc24.mp3";
+    public String text = "WUML 91.5 FM Lowell, MA";
+    public String url = "http://s3.radio.co/s5e286e909/listen"; //"http://vprbbc.streamguys.net:80/vprbbc24.mp3";
+    //private static final String url = "http://vprbbc.streamguys.net:80/vprbbc24.mp3";
     private Button internetRadioButton;
+    private Button changestationButton;
+
+    private TextView status;
+    private TextView station;
+
     private boolean radioOn;
     private boolean radioWasOnBefore;
+
+    AudioManager audioManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,12 +56,66 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+
+        Spinner spinner = findViewById(R.id.spinner1);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,R.array.radio_stations, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(this);
+
         radioOn = false;
         radioWasOnBefore = false;
 
+        int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        int maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         mediaPlayer = new MediaPlayer();
 
+        SeekBar seekBar = (SeekBar) findViewById(R.id.volumeSeekBar);
+        seekBar.setMax(maxVolume);
+        seekBar.setProgress(currentVolume);
+
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
         internetRadioButton = findViewById(R.id.internet_radio_button);
+        changestationButton = findViewById(R.id.change_station);
+        status = (TextView)findViewById(R.id.isPlaying);
+        station = (TextView)findViewById(R.id.current_station);
+
+        changestationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                    mediaPlayer.reset();
+                    station.setText(text);
+                    status.setText("RADIO IS NOT PLAYING");
+                    if (!mediaPlayer.isPlaying()) {
+                        if (radioWasOnBefore) {
+                            mediaPlayer.release();
+                            mediaPlayer = new MediaPlayer();
+                        }
+                        radioSetup(mediaPlayer);
+                        mediaPlayer.prepareAsync();
+                        station.setText(text);
+                        radioOn = true;
+                        internetRadioButton.setText("Turn radio OFF");
+                    }
+                }
+        });
 
         internetRadioButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -60,7 +128,8 @@ public class MainActivity extends AppCompatActivity {
                         Log.i(TAG, "Radio is playing- turning off " );
                         radioWasOnBefore = true;
                     }
-                    mediaPlayer.pause();
+                    mediaPlayer.reset();
+                    status.setText("RADIO IS NOT PLAYING");
                 } else { // OFF so Turn ON
                     radioOn = true;
                     internetRadioButton.setText("Turn radio OFF");
@@ -71,15 +140,15 @@ public class MainActivity extends AppCompatActivity {
                         }
                         radioSetup(mediaPlayer);
                         mediaPlayer.prepareAsync();
+                        station.setText(text);
                     }
                 }
-
             }
         });
     }
 
     public void radioSetup(MediaPlayer mediaPlayer) {
-
+        status.setText("PREPARING STATION");
         mediaPlayer.setAudioAttributes(
                 new AudioAttributes.Builder()
                         .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
@@ -92,6 +161,7 @@ public class MainActivity extends AppCompatActivity {
             public void onPrepared(MediaPlayer mp) {
                 Log.i(TAG, "onPrepared" );
                 mediaPlayer.start();
+                status.setText("RADIO IS PLAYING");
             }
         });
 
@@ -160,6 +230,18 @@ public class MainActivity extends AppCompatActivity {
 
             }
         };
+
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        text = parent.getItemAtPosition(position).toString();
+        url = getResources().getStringArray(R.array.radio_urls)[position];
+        Toast.makeText(parent.getContext(), url, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
 
     }
 }
